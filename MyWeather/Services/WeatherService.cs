@@ -2,6 +2,9 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using static Newtonsoft.Json.JsonConvert;
+using System;
+using Plugin.Geolocator;
+using System.Diagnostics;
 
 namespace MyWeather.Services
 {
@@ -32,7 +35,18 @@ namespace MyWeather.Services
 
         }
 
-        public async Task<WeatherRoot> GetWeather(string city, Units units = Units.Imperial)
+		public async Task<WeatherRoot> GetWeatherGps (Units units = Units.Imperial)
+		{
+			var locator = CrossGeolocator.Current;
+			locator.DesiredAccuracy = 50;
+
+			var position = await locator.GetPositionAsync (timeoutMilliseconds: 10000);
+
+			return await GetWeather (position.Latitude, position.Longitude,units);
+			
+		}
+
+		public async Task<WeatherRoot> GetWeather(string city, Units units = Units.Imperial)
         {
             using (var client = new HttpClient())
             {
